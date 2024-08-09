@@ -57,13 +57,14 @@ def process():
             topic = base_topic + key.replace('.', '/').replace(' ', '_')
             msgs.append((topic, value, 0, True))
 
-        timestamp = time.time()
-        msgs.append((base_topic + 'timestamp', timestamp, 0, True))
-        msgs.append((base_topic + 'lastUpdate',
-                     datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S %Z'), 0, True))
-        for msg in msgs:
-            print(f'Sending to topic {msg[0]}: {msg[1]}')
-            mqtt_client.publish(msg[0], msg[1], msg[2], msg[3])
+    timestamp = time.time()
+    msgs.append((base_topic + 'timestamp', timestamp, 0, True))
+    msgs.append((base_topic + 'lastUpdate',
+                 datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S %Z'), 0, True))
+
+    for msg in msgs:
+        print(f'Sending to topic {msg[0]}: {msg[1]}')
+        mqtt_client.publish(msg[0], msg[1], msg[2], msg[3])
 
 
 if __name__ == '__main__':
