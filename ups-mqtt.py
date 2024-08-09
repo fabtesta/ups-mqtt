@@ -65,6 +65,7 @@ def process():
     for msg in msgs:
         print(f'Sending to topic {msg[0]}: {msg[1]}')
         mqtt_client.publish(msg[0], msg[1], msg[2], msg[3])
+        time.sleep(1)
 
 
 if __name__ == '__main__':
