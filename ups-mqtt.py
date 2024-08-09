@@ -2,12 +2,15 @@
 
 import os
 import subprocess
-import paho.mqtt.publish as mqtt
 import time
 from time import sleep, localtime, strftime
 import datetime
 from configparser import ConfigParser
 import shutil
+
+import paho.mqtt.client as mqtt
+from paho.mqtt.enums import CallbackAPIVersion
+from paho.mqtt.reasoncodes import ReasonCode
 
 if not os.path.exists('conf/config.ini'):
     shutil.copy('config.ini', 'conf/config.ini')
@@ -31,6 +34,9 @@ mqtt_user = config['MQTT'].get('username', None)
 mqtt_password = config['MQTT'].get('password', None)
 interval = config['GENERAL'].getint('interval', 60)
 
+mqtt_client = mqtt.Client(callback_api_version=CallbackAPIVersion.VERSION2)
+mqtt_client.username_pw_set(username=mqtt_user, password=mqtt_password)
+mqtt_client.connect(mqtt_host, mqtt_port)
 
 def process():
     ups = subprocess.run(["upsc", ups_name + "@" + ups_host], stdout=subprocess.PIPE)
@@ -55,7 +61,9 @@ def process():
         msgs.append((base_topic + 'timestamp', timestamp, 0, True))
         msgs.append((base_topic + 'lastUpdate',
                      datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S %Z'), 0, True))
-        mqtt.multiple(msgs, hostname=mqtt_host, port=mqtt_port, auth={'username': mqtt_user, 'password': mqtt_password})
+        for msg in msgs:
+            print(f'Sending to topic {msg[0]}: {msg[1]}')
+            mqtt_client.publish(msg[0], msg[1], msg[2], msg[3])
 
 
 if __name__ == '__main__':
